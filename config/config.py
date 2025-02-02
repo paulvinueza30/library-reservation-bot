@@ -6,7 +6,7 @@ from config.preferences import Preferences
 
 def get_driver():
     options = Options()
-    options.binary_location = "/usr/local/bin/firefox"
+    options.binary_location = "/usr/bin/firefox"
     options.headless = True
     options.log.level = "trace"
 
