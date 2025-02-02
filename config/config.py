@@ -1,31 +1,30 @@
 from selenium import webdriver
-from selenium.webdriver.firefox.service import Service
-from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
-from config.preferences import Preferences
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+import os
 
 def get_driver():
-    options = Options()
-    options.binary_location = "/usr/bin/firefox"
-    options.headless = True
-    options.log.level = "trace"
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")  # Disables GPU acceleration
-    options.add_argument("--disable-software-rasterizer")  # Disables software rendering
-    options.add_argument("--start-maximized")  # Optional: Start browser maximized (not in headless mode)
-    options.add_argument("--disable-extensions")  # Disable unnecessary extensions
+    # Set up Chrome options
+    chrome_options = Options()
+    chrome_options.binary_location = "/usr/bin/google-chrome"  # Path to your Chrome binary
+    chrome_options.headless = True  # Change this to True if you want headless mode
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")  # Disables GPU acceleration
+    chrome_options.add_argument("--disable-software-rasterizer")  # Disables software rendering
+    chrome_options.add_argument("--start-maximized")  # Optional: Start browser maximized
+    chrome_options.add_argument("--disable-extensions")  # Disable unnecessary extensions
 
-    # Path to the Firefox profile you want to use
-    profile_path = Preferences().get_profiile_path()
+    # Path to your transferred Chrome profile
+    profile_path = os.path.expanduser("~/.config/google-chrome/User Data")
     
-    # Set Firefox profile
-    profile = FirefoxProfile(profile_path)
-    options.profile = profile
+    # Specify a unique user data directory for Chrome (make sure to point to the correct profile)
+    chrome_options.add_argument(f"user-data-dir={profile_path}")  # Use the profile from EC2 instance
 
-    # Path to the geckodriver
-    service = Service("/usr/local/bin/geckodriver")
+    # Path to ChromeDriver (make sure it's in your PATH or provide full path)
+    service = Service("/usr/local/bin/chromedriver")
 
-    # Create the Firefox driver with the specified options and profile
-    driver = webdriver.Firefox(service=service, options=options, timeout = 240)
+    # Create the Chrome driver with the specified options
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    
     return driver
