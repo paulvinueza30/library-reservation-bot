@@ -67,7 +67,7 @@ def scroll_to_time(driver, start_time):
         ActionChains(driver).send_keys(Keys.ARROW_RIGHT).perform()
         time.sleep(0.2)  
 
-def select_time_block(driver, start_time, max_retries=5):
+def select_time_block(driver, start_time, end_time, max_retries=5):
     """
     Select the time block based on the time slot provided.
     Scrolls to the time slot and clicks on it if it's available.
@@ -101,7 +101,8 @@ def select_time_block(driver, start_time, max_retries=5):
             
             # Scroll to the bottom to ensure reservation length dropdown is visible
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            select_reservation_length(driver = driver)
+            desired_slots = int((end_time - start_time) / .5)
+            select_reservation_length(driver = driver, slots = desired_slots)
             
             # After selecting the time block, find and click the "Submit Times" button
             submit_button = WebDriverWait(driver, 10).until(
@@ -123,10 +124,20 @@ def select_time_block(driver, start_time, max_retries=5):
     print(f"Could not find an available time block after {max_retries} attempts.")
     return False
 
-def select_reservation_length(driver):
+def select_reservation_length(driver, slots):
     """
-    Selects the reservation length from the dropdown menu.
+    Selects the reservation length from the dropdown menu based on the number of slots requested.
+    Ensures that the number of slots is between 1 and 16.
+    If the desired slots are not available, selects the maximum available length.
     """
+    if slots <= 0:
+        print("Error: The number of slots must be greater than 0.")
+        return
+    
+    if slots > 16:
+        print("Error: The number of slots must be 16 or fewer.")
+        return
+    
     try:
         # Wait for the booking end dropdown to be visible and interactable
         booking_input = WebDriverWait(driver, 10).until(
@@ -136,9 +147,18 @@ def select_reservation_length(driver):
         # Create a Select object to interact with the <select> dropdown
         select = Select(booking_input)
         
-        # Select the last option in the dropdown
-        select.select_by_index(len(select.options) - 1)
-        print("Reservation length selected.")
+        # Get the list of all options in the dropdown
+        options = select.options
+        
+        # If the dropdown has more options than the requested slots, attempt to select the corresponding option
+        if len(options) >= slots:
+            select.select_by_index(slots - 1)  # Slots are 1-based, so select by index (slots-1)
+            print(f"Reservation length of {slots} slots selected.")
+        else:
+            # If the requested slots are not available, select the maximum available option
+            max_length = len(options)  # Maximum available options
+            select.select_by_index(max_length - 1)
+            print(f"Requested {slots} slots, but only {max_length} slots are available. Max available length selected.")
     
     except Exception as e:
         print(f"Error: Could not select the reservation length. Details: {str(e)}")

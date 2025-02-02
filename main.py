@@ -19,7 +19,7 @@ def main():
     # Got preferences now scroll all the way down for time selection step
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-    time_confirmation = select_time_block(driver = driver, start_time = preferences.get_time_slot())
+    time_confirmation = select_time_block(driver = driver, start_time = preferences.get_time_slot(), end_time = preferences.get_end_time())
 
     if time_confirmation:
         find_continue(driver = driver)
