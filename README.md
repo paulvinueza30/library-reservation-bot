@@ -34,7 +34,7 @@ Before setting up the bot, ensure the following are installed and properly confi
     - The bot uses Selenium to automate interactions with the browser. You can install it via pip:
     
     ```bash
-    pip install selenium python-dotenv
+    pip install selenium
     ```
 
 3. **Geckodriver**
@@ -114,7 +114,7 @@ The bot relies on several environment variables that are stored in the `.env` fi
 Once you have completed the setup and configured the `.env` file, you can run the bot using the following command:
 
 ```bash
-python main.py
+python3 main.py
 ```
 
 This will start the bot, which will attempt to find available time slots for the given **category**, **start time**, and **end time**. The bot will automatically interact with the website, select the time block, and complete the reservation.
@@ -149,20 +149,3 @@ You should now have everything set up to use the **Library Reservation Bot**. Th
 If you encounter any issues, feel free to contact the repository owner or raise an issue in the repository.
 
 ---
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
-
----
-
-### Key Sections in the README:
-1. **Introduction** – Briefly explains what the bot does.
-2. **Prerequisites** – Describes the software dependencies required to run the bot (Python, Selenium, Firefox, Geckodriver).
-3. **Setup Instructions** – Explains how to clone the repository, install dependencies, and configure the `.env` file with necessary environment variables.
-4. **Running the Bot** – Describes how to execute the bot after setup.
-5. **Troubleshooting** – Common issues that users might face and how to resolve them.
-6. **License** – A placeholder for licensing information (if applicable).
-
-By saving this content as `README.md` in your project, it will automatically format as Markdown when viewed on platforms like GitHub, GitLab, or Bitbucket.
