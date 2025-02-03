@@ -5,6 +5,7 @@ from browser_controls.reservation_selector import navigate_to_date, select_categ
 from browser_controls.time_selector import select_time_block
 from browser_controls.confirm_booking import find_continue, fill_reserver_info, submit_booking
 
+import time
 def main():
     preferences = Preferences()    
     

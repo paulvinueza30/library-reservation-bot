@@ -54,7 +54,7 @@ def scroll_to_time(driver, start_time):
     
     # Scroll horizontally until the time span is found
     while True:
-        driver.execute_script("window.scrollBy(300, 0);")  # Adjust scroll speed
+        driver.execute_script("window.scrollBy(200, 0);")  # Adjust scroll speed
         time_span = driver.find_elements(By.XPATH, f"//span[contains(text(), '{time_str}')]")
         
         if time_span:
@@ -75,15 +75,17 @@ def select_time_block(driver, start_time, end_time, max_retries=5):
             )
             available_slot.click()
             print(f"Time block {time_str} selected successfully.")
-            
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            # Scroll the page by small increments until reaching the bottom
+            for _ in range(2):  # You can increase the range if needed
+                driver.execute_script("window.scrollBy(0, 1000);")  # Scroll by 1000px down
+                time.sleep(1)  # Short pause between scrolls to allow for rendering
+
             desired_slots = int((end_time - start_time) / .5)
             select_reservation_length(driver, desired_slots)
 
             submit_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.ID, "submit_times"))
             )
-            driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
             submit_button.click()
             print("Times submitted successfully.")
             return True
@@ -97,11 +99,13 @@ def select_time_block(driver, start_time, end_time, max_retries=5):
     print(f"Could not find an available time block after {max_retries} attempts.")
     return False
 
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 def select_reservation_length(driver, slots):
     """
     Selects the reservation length from the dropdown menu based on the number of slots requested.
-    Ensures that the number of slots is between 1 and 16.
-    If the desired slots are not available, selects the maximum available length.
     """
     if slots <= 0:
         print("Error: The number of slots must be greater than 0.")
@@ -112,26 +116,35 @@ def select_reservation_length(driver, slots):
         return
     
     try:
-        # Wait for the booking end dropdown to be visible and interactable
+        # Wait for the dropdown to be visible using Expected Conditions
+        dropdown_xpath = "//select[starts-with(@id, 'bookingend')]"
+        
         booking_input = WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.ID , "bookingend_1"))
+            EC.visibility_of_element_located((By.XPATH, dropdown_xpath))
         )
         
-        # Create a Select object to interact with the <select> dropdown
-        select = Select(booking_input)
+        # Scroll the dropdown into view (this can help if it's off-screen or covered by something)
+        driver.execute_script("arguments[0].scrollIntoView(true);", booking_input)
         
-        # Get the list of all options in the dropdown
-        options = select.options
+        # Get all options in the dropdown
+        options = driver.find_elements(By.XPATH, "//select[starts-with(@id, 'bookingend')]/option")
         
-        # If the dropdown has more options than the requested slots, attempt to select the corresponding option
-        if len(options) >= slots:
-            select.select_by_index(slots - 1)  # Slots are 1-based, so select by index (slots-1)
-            print(f"Reservation length of {slots} slots selected.")
+        # Check available slots
+        available_slots = len(options)
+        print(f"Available slots: {available_slots}")
+        
+        # Determine the index to select (indexing starts at 0, so subtract 1 for 1-based index)
+        if slots <= available_slots:
+            index_to_select = slots - 1  # Slots are 1-based
+            print(f"Selecting slot number {slots} ({options[index_to_select].text})")
         else:
-            # If the requested slots are not available, select the maximum available option
-            max_length = len(options)  # Maximum available options
-            select.select_by_index(max_length - 1)
-            print(f"Requested {slots} slots, but only {max_length} slots are available. Max available length selected.")
+            index_to_select = available_slots - 1  # Select max available slot
+            print(f"Requested {slots} slots, but only {available_slots} are available. Selecting max available slot.")
+        
+        # Click the desired option
+        options[index_to_select].click()
+        print(f"Reservation length of {options[index_to_select].text} selected.")
     
     except Exception as e:
         print(f"Error: Could not select the reservation length. Details: {str(e)}")
+        return
