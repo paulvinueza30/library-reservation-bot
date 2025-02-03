@@ -46,7 +46,7 @@ def scroll_to_time(driver, start_time):
     time_str = convert_start_time_to_string(start_time)
     
     # Locate the top-left corner element and click to focus
-    top_left_element = driver.find_element(By.XPATH, "/html/body/div[3]/main/div/div/div/div[4]/div[1]/div[2]/div/table/tbody/tr[1]/td[3]/div/div/div/table/tbody/tr/th[1]")
+    top_left_element = driver.find_element(By.XPATH, "//*[@id='eq-time-grid']/div[2]/div/table/thead/tr/td[3]/div/div/div/table/tbody/tr/th[1]/div/span")
     ActionChains(driver).move_to_element(top_left_element).click().perform()
     
     # Wait for grid to load and in focus
