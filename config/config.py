@@ -17,15 +17,15 @@ def get_driver():
     chrome_options.add_argument("--disable-extensions")  # Disable unnecessary extensions
 
     # Path to the uploaded Chrome profile on EC2 (ensure this is where you extracted it)
-    user_data_dir = "/home/ubuntu/Chrome"  # Path where you extracted your Chrome profile on EC2
+    user_data_dir = "/home/ubuntu/bot-profile"  # Path where you extracted your Chrome profile on EC2
     profile_directory = "Profile 2"  # The name of your profile folder (e.g., Profile 2)
 
     # Create a unique user data directory to avoid conflicts
-    unique_user_data_dir = f"{user_data_dir}_{int(time.time())}"  # Use current timestamp to make it unique
-    os.makedirs(unique_user_data_dir, exist_ok=True)
+    # unique_user_data_dir = f"{user_data_dir}_{int(time.time())}"  # Use current timestamp to make it unique
+    # os.makedirs(unique_user_data_dir, exist_ok=True)
 
     # Specify the user data directory and profile directory
-    chrome_options.add_argument(f"user-data-dir={unique_user_data_dir}")  # Path to the user data directory
+    # chrome_options.add_argument(f"user-data-dir={unique_user_data_dir}")  # Path to the user data directory
     chrome_options.add_argument(f"profile-directory={profile_directory}")  # Profile name
 
     # Path to ChromeDriver (make sure it's in your PATH or provide full path)
