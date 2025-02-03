@@ -39,18 +39,18 @@ def convert_half_hour_time_to_string(start_time: float):
     return time_str.lower()
 
 def scroll_to_time(driver, start_time):
-    """
-    Scrolls horizontally through the time grid to the right until the desired time span is visible.
-    Then performs a specified number of right arrow key presses.
-    """
     time_str = convert_start_time_to_string(start_time)
     
-    # Locate the top-left corner element and click to focus
-    top_left_element = driver.find_element(By.XPATH, "//*[@id='eq-time-grid']/div[2]/div/table/thead/tr/td[3]/div/div/div/table/tbody/tr/th[1]/div/span")
+    # Wait for the top-left corner element to be present and clickable
+    top_left_element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.XPATH, "//*[@id='eq-time-grid']/div[2]/div/table/thead/tr/td[3]/div/div/div/table/tbody/tr/th[1]/div/span"))
+    )
     ActionChains(driver).move_to_element(top_left_element).click().perform()
     
-    # Wait for grid to load and in focus
-    time.sleep(1)
+    # Wait for the grid to load and be in focus
+    WebDriverWait(driver, 10).until(
+        EC.visibility_of(top_left_element)
+    )
     
     # Scroll horizontally until the time span is found
     while True:
@@ -58,67 +58,38 @@ def scroll_to_time(driver, start_time):
         time_span = driver.find_elements(By.XPATH, f"//span[contains(text(), '{time_str}')]")
         
         if time_span:
-            # Time span found, break the loop
+            driver.execute_script("arguments[0].scrollIntoView(true);", time_span[0])
             break
-    
-    # Perform additional right arrow key presses (if necessary)
-    right_arrow_shift = 25
-    for _ in range(right_arrow_shift):  
-        ActionChains(driver).send_keys(Keys.ARROW_RIGHT).perform()
-        time.sleep(0.2)  
 
 def select_time_block(driver, start_time, end_time, max_retries=5):
-    """
-    Select the time block based on the time slot provided.
-    Scrolls to the time slot and clicks on it if it's available.
-    
-    Retries for max_retries if the time block is not available.
-    After successfully selecting the time, clicks on the "Submit Times" button.
-    """
-    scroll_to_time(driver = driver, start_time = start_time)
+    scroll_to_time(driver, start_time)
     retries = 0
     
     while retries < max_retries:
+        time_str = convert_start_time_to_string(start_time)
         
-        # Determine if it's a half-hour or whole hour and convert accordingly
-        if start_time % 1 == 0:
-            time_str = convert_start_time_to_string(start_time)  # Use whole hour
-        else:
-            time_str = convert_half_hour_time_to_string(start_time)  # Use half hour
-        
-        # Construct the dynamic XPath with the formatted time string
         xpath = f"//a[contains(@title, 'Available') and contains(@title, '{time_str}') and contains(@class, 'fc-timeline-event')]"
-        
         try:
-            # Wait for the available slot to be clickable
             available_slot = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, xpath))
             )
-            
-            # Click the available time slot
             available_slot.click()
             print(f"Time block {time_str} selected successfully.")
             
-            # Scroll to the bottom to ensure reservation length dropdown is visible
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             desired_slots = int((end_time - start_time) / .5)
-            select_reservation_length(driver = driver, slots = desired_slots)
+            select_reservation_length(driver, desired_slots)
 
-            
-            # After selecting the time block, find and click the "Submit Times" button
             submit_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.ID, "submit_times"))
             )
             driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
             submit_button.click()
             print("Times submitted successfully.")
-            
-            return True  # Exit function once the time block is clicked and submitted
+            return True
         
         except Exception as e:
             print(f"Error: Could not find or click the time block {time_str}. Details: {str(e)}")
-            
-            # Increment start_time by 0.5 hours (30 minutes) for the next attempt
             start_time += 0.5
             print("UPDATED START TIME: " + str(start_time))
             retries += 1
@@ -143,7 +114,7 @@ def select_reservation_length(driver, slots):
     try:
         # Wait for the booking end dropdown to be visible and interactable
         booking_input = WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.ID, "bookingend_1"))
+            EC.visibility_of_element_located((By.ID , "bookingend_1"))
         )
         
         # Create a Select object to interact with the <select> dropdown
