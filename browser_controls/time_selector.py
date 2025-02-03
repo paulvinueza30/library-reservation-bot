@@ -87,7 +87,7 @@ def select_time_block(driver, start_time, end_time, max_retries=5):
             time_str = convert_half_hour_time_to_string(start_time)  # Use half hour
         
         # Construct the dynamic XPath with the formatted time string
-        xpath = f"//a[contains(@title, 'Available') and contains(@title, '{time_str}')]"
+        xpath = f"//a[contains(@title, 'Available') and contains(@title, '{time_str}') and contains(@class, 'fc-timeline-event')]"
         
         try:
             # Wait for the available slot to be clickable
