@@ -103,11 +103,13 @@ def select_time_block(driver, start_time, end_time, max_retries=5):
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             desired_slots = int((end_time - start_time) / .5)
             select_reservation_length(driver = driver, slots = desired_slots)
+
             
             # After selecting the time block, find and click the "Submit Times" button
             submit_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.ID, "submit_times"))
             )
+            driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
             submit_button.click()
             print("Times submitted successfully.")
             
