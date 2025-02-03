@@ -4,6 +4,7 @@ from config.preferences import Preferences
 from browser_controls.reservation_selector import navigate_to_date, select_category
 from browser_controls.time_selector import select_time_block
 from browser_controls.confirm_booking import find_continue, fill_reserver_info, submit_booking
+from browser_controls.handle_mfa import handle_mfa
 
 import time
 def main():
@@ -23,6 +24,12 @@ def main():
     time_confirmation = select_time_block(driver = driver, start_time = preferences.get_time_slot(), end_time = preferences.get_end_time())
 
     if time_confirmation:
+        time.sleep(5)
+        print(driver.current_url)
+        if "microsoftonline" in driver.current_url:
+            email , password = preferences.get_email_info()
+            handle_mfa(driver = driver, email = email, password = password)
+            time.sleep(5)
         find_continue(driver = driver)
         fill_reserver_info(driver = driver, public_name = preferences.get_public_name(), ucf_id = preferences.get_ucf_id())
         submit_booking(driver = driver)

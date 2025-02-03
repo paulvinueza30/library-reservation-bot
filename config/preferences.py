@@ -11,6 +11,8 @@ class Preferences:
         self.category_value = int(os.getenv("CATEGORY_VALUE", 0))  # Default to 0 if CATEGORY_VALUE is not set
         self.profile_path = os.getenv("PROFILE_PATH", "")
         self.public_name = os.getenv("PUBLIC_NAME", "GUEST")
+        self.email = os.getenv("EMAIL", "none")
+        self.password = os.getenv("EMAIL_PASSWORD")
         self.ucf_id = os.getenv("UCF_ID", "")
 
     def __repr__(self):
@@ -28,4 +30,5 @@ class Preferences:
         return self.public_name
     def get_ucf_id(self):
         return str(self.get_ucf_id)
-
+    def get_email_info(self):
+        return self.email, self.password
